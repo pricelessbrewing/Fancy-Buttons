@@ -1,4 +1,7 @@
 # Fancy-Buttons
+
+[![ScreenShot](https://raw.github.com/skyfoxdesign/Fancy-Buttons/master/Screenshot.png)](https://codepen.io/skyfox/full/xgjjaW/)
+
 A jQuery-dependant 3D interactive button fancifier
 
 This is a simple plugin which can turn boring buttons into cool 3D interactive widgets!
@@ -14,4 +17,4 @@ Tested on Android, iOS, Safari, Firefox and Chrome.
 
 ## Preview
 
-For a live demo, see the example on CodePen <b><a href="https://codepen.io/skyfox/full/xgjjaW/" target="_blank">here</a></b>.
+For a live demo, see the example on CodePen <b>[here](https://codepen.io/skyfox/full/xgjjaW/)</b>.
