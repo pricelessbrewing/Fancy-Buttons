@@ -18,6 +18,8 @@
  * @autor Alexey Kupriyanenko (a.kupriyanenko@gmail.com)
  */
 
+var hoverable = true;
+
 var buttonClass = "fancy-button";
 var buttonContainer = "fancy-buttonContainer";
 var buttonOverlayContainer = "fancy-buttonOverlayContainer";
@@ -336,9 +338,7 @@ jQuery.fn.extend({
         var b = this,
           c = $(this),
           d = !0;
-        b.addEventListener("touchstart", function(a) {
-          a.preventDefault()
-        }, !1), b.addEventListener("touchmove", function(e) {
+        b.addEventListener("touchstart", function(a) {}, !1), b.addEventListener("touchmove", function(e) {
           isTouchStateLeave(c) ? (d && a.call(b, e), d = !1) : d = !0
         }, !1)
       }
@@ -348,41 +348,21 @@ jQuery.fn.extend({
 
 document.addEventListener("touchstart", function() {}, true);
 
-$.fn.tdown = function(onclick) {
-  this.on("touchstart", function(e) {
-    onclick.call(this, e);
-    e.stopPropagation();
-    e.preventDefault();
-  });
-  this.on("mousedown", function(e) {
-    onclick.call(this, e);
-  });
-  return this;
-};
+var isTouch = ('ontouchstart' in window);
 
-$.fn.tup = function(onclick) {
-  this.on("touchend", function(e) {
-    onclick.call(this, e);
-    e.stopPropagation();
+function kill(type) {
+  window.document.body.addEventListener(type, function(e) {
     e.preventDefault();
-  });
-  this.on("mouseup", function(e) {
-    onclick.call(this, e);
-  });
-  return this;
-};
+    e.stopPropagation();
+    return false;
+  }, true);
+}
 
-$.fn.tmove = function(onclick) {
-  this.on("touchmove", function(e) {
-    onclick.call(this, e);
-    e.stopPropagation();
-    e.preventDefault();
-  });
-  this.on("mousemove", function(e) {
-    onclick.call(this, e);
-  });
-  return this;
-};
+if (isTouch) {
+  kill('mousedown');
+  kill('mouseup');
+  kill('mousemove');
+}
 
 var hover = null,
   click = false,
@@ -391,7 +371,7 @@ var hover = null,
 
 function activeTransition(element) {
   return {
-    perspective: '1000px',
+    perspective: Math.max(width, height)*2,
     duration: $(element).is(hover) ? 0 : 100,
     rotateX: -clampedY + 'deg',
     rotateY: clampedX + 'deg',
@@ -401,7 +381,7 @@ function activeTransition(element) {
 
 function reenterTransition(element) {
   return {
-    perspective: '1000px',
+    perspective: Math.max(width, height)*2,
     duration: 100,
     rotateX: -clampedY + 'deg',
     rotateY: clampedX + 'deg',
@@ -416,11 +396,12 @@ function inactiveTransition(element) {
     rotateY: '0deg',
     scale: 1
   });
-  $(element).children("." + buttonOverlayContainer).stop().transition({
+  $(element).children("." + buttonOverlayContainer).stopTransition().transition({
     'duration': 500,
     'opacity': '0'
   });
   hover = null;
+  down = false;
 }
 
 function initialOpacity(element) {
@@ -453,23 +434,27 @@ function calculateVar(pageX, pageY, offsetLeft, offsetTop, element) {
   $(element).find("." + buttonOverlay).transition(gradient(element));
 }
 
-$("." + buttonClass).mousemove(function(e) {
-  if ($(this).is(hover)) {
-    calculateVar(e.pageX, e.pageY, this.offsetLeft, this.offsetTop, this);
-    $(this).css(activeTransition(this));
+$("." + buttonClass).on("mousemove", function(e) {
+  if (hoverable === true) {
+    if ($(this).is(hover)) {
+      calculateVar(e.pageX, e.pageY, this.offsetLeft, this.offsetTop, this);
+      $(this).css(activeTransition(this));
+    } else {
+      calculateVar(e.pageX, e.pageY, this.offsetLeft, this.offsetTop, this);
+      $(this).stopTransition().transition(activeTransition(this));
+      hover = $(this);
+    }
   } else {
-    calculateVar(e.pageX, e.pageY, this.offsetLeft, this.offsetTop, this);
-    $(this).stopTransition().transition(activeTransition(this));
-    hover = $(this);
+    if (down) {
+      calculateVar(e.pageX, e.pageY, this.offsetLeft, this.offsetTop, this);
+      $(this).css(activeTransition(this));
+    };
   }
 });
 
-$("." + buttonContainer).mouseleave(function() {
-  var child = $(this).children("." + buttonClass);
-  inactiveTransition(child);
-});
-
 function triggerEnter(x, y) {
+  
+      
   $("." + buttonClass).each(function() {
     if (!(
         x <= $(this).offset().left || x >= $(this).offset().left + $(this).outerWidth() ||
@@ -479,13 +464,11 @@ function triggerEnter(x, y) {
       if ($(this).is(hover)) {
         calculateVar(x, y, this.offsetLeft, this.offsetTop, this);
         $(this).stopTransition().transition(activeTransition(this));
-
       } else {
         calculateVar(x, y, this.offsetLeft, this.offsetTop, this);
         $(this).stopTransition().transition(reenterTransition(this));
         if (hover !== null) {
           inactiveTransition(hover);
-
         }
         hover = $(this);
       }
@@ -499,32 +482,63 @@ function triggerEnter(x, y) {
 }
 
 $("." + buttonClass).on("touchstart", function(e) {
+  click = true;
   calculateVar(e.pageX, e.pageY, this.offsetLeft, this.offsetTop, this);
+  click = false;
+  $(this).stopTransition().transition(activeTransition(this));
+  down = true;
+  hover = $(this);
+});
+
+$("." + buttonClass).mousedown(function(e) {
+  click = true;
+  calculateVar(e.pageX, e.pageY, this.offsetLeft, this.offsetTop, this);
+  click = false;
   $(this).stopTransition().transition(activeTransition(this));
   hover = $(this);
-  event.preventDefault();
+  down = true;
 });
 
-$("." + buttonClass).on("touchmove", function(evt) {
-  var touch = evt.originalEvent.touches[0]
-  triggerEnter(touch.clientX, touch.clientY);
-
-});
-
-$("." + buttonClass).on("touchend", function() {
-  if (hover !== null) {
-    inactiveTransition(hover);
-  }
-});
-
-$("." + buttonClass).on("mousedown", function(e) {
-  $(this).stopTransition().transition({
-    opacity: "0.8",
+if (hoverable === true) {
+  $("." + buttonClass).on("touchmove", function(evt) {
+    evt.preventDefault();
+    var touch = evt.originalEvent.touches[0]
+    triggerEnter(evt.pageX, evt.pageY);
   });
-});
-
-$("." + buttonClass).on("mouseup", function(e) {
-  $(this).stopTransition().transition({
-    opacity: "1",
+  $("." + buttonClass).on("touchend", function() {
+    if (hover !== null) {
+      inactiveTransition(hover);
+    }
   });
-});
+  $("." + buttonContainer).on("mouseleave", function() {
+    var child = $(this).children("." + buttonClass);
+    inactiveTransition(child);
+  });
+} else {
+  $("." + buttonClass).on("touchmove", function(e) {
+    if (down) {
+      calculateVar(e.pageX, e.pageY, this.offsetLeft, this.offsetTop, this);
+      $(this).css(activeTransition(this));
+      e.preventDefault();
+    };
+    
+  });
+  $("." + buttonClass).on("mousemove", function(e) {
+    if (down) {
+      calculateVar(e.pageX, e.pageY, this.offsetLeft, this.offsetTop, this);
+      $(this).css(activeTransition(this));
+    };
+  });
+  $("." + buttonClass).on("mouseup", function() {
+    inactiveTransition(this);
+  });
+  $("." + buttonClass).on("touchend", function() {
+    inactiveTransition(this);
+  });
+  $("." + buttonClass).on("mouseleave", function() {
+    inactiveTransition(this);
+  });
+  $("." + buttonClass).touchleave(function() {
+    inactiveTransition(this);
+  });
+}
