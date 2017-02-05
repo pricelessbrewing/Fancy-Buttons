@@ -11,3 +11,7 @@ Default setting for hoverable is '<b>true</b>', set this to '<b>false</b>' if yo
 To install, add the .js and .css files into your code after jQuery is loaded. Then simply add the class 'fancy-button' to any button where you would like to see the effect and watch as it automagically converts your existing button into a <i>Fancy Button</i>.
 
 Tested on Android, iOS, Safari, Firefox and Chrome.
+
+## Preview
+
+For a live demo, see the example on CodePen <b><a href="https://codepen.io/skyfox/full/xgjjaW/" target="_blank">here</a></b>.
