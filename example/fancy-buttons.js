@@ -420,8 +420,8 @@ function gradient(element) {
 }
 
 function calculateVar(pageX, pageY, offsetLeft, offsetTop, element) {
-    width = $(element).width();
-    height = $(element).height();
+    width = $(element).outerWidth();
+    height = $(element).outerHeight();
     percentX = (pageX - offsetLeft) / width * 100;
     percentY = (pageY - offsetTop) / height * 100;
     clampedX = (Math.min(10, Math.max(-10, ((percentX - 50) / 3))));
