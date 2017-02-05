@@ -7,6 +7,7 @@ There are two variants - one for traditional buttons (where the interaction only
 
 Default setting for hoverable is '<b>true</b>', set this to '<b>false</b>' if you wish to use the traditional button click style.
 
-Simply add the class 'fancy-button' to any button where you would like to see the effect and watch as it automagically converts your existing button into a <i>Fancy Button</i>.To 
+## Installation
+To install, add the .js and .css files into your code after jQuery is loaded, and simply add the class 'fancy-button' to any button where you would like to see the effect and watch as it automagically converts your existing button into a <i>Fancy Button</i>.To 
 
 Tested on Android, iOS, Safari, Firefox and Chrome.
